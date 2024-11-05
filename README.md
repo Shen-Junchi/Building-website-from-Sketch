@@ -120,3 +120,59 @@ This part is to receive the request.json file from frontend, like in ChatGPT, yo
 }
 ```
 And this is assign to variable data, then the api_key variable get api-key from data. If api-key exist, then print(I get it )
+---
+```
+def chat():
+    if not dashscope.api_key:
+        return jsonify({"error": "Please configure your API key first"})
+    
+    data = request.json
+    message = data.get("message")
+    
+    try:
+        messages = [{'role': 'user', 'content': message}]
+        response = dashscope.Generation.call(
+            model='qwen-turbo',
+            messages=messages,
+            result_format='message',  # 设置结果格式为消息
+        )
+        
+        if response.status_code == 200:
+            return jsonify({"response": response.output.choices[0].message.content})
+        else:
+            return jsonify({"error": f"API Error: {response.code}"})
+            
+    except Exception as e:
+        return jsonify({"error": str(e)})
+```
+Now the most important part, which is the main function of this program:
+First, check if api key exist or not: 
+```
+def chat():
+    if not dashscope.api_key:
+        return jsonify({"error": "Please configure your API key first"})
+
+```
+Then, get message from data that the client.
+```
+    data = request.json
+    message = data.get("message")
+```
+Next we try to send message to service: 
+```
+    try:
+        messages = [{'role': 'user', 'content': message}]
+```
+After that, create a dictionary for user to send useful or information to service, using format tat given by API company. Then using the ` dashscope.Generation.call` to send this request toward the company and wait for the response. 
+```
+        response = dashscope.Generation.call(
+            model='qwen-turbo',
+            messages=messages,
+            result_format='message',  # 设置结果格式为消息
+        )
+```
+
+Lastly, analysis the response and return it out. 
+
+
+
